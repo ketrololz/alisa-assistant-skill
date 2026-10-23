@@ -43,7 +43,7 @@ async function askGemini(history, search) {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM }] }, contents, generationConfig: { maxOutputTokens: 600, thinkingConfig: { thinkingLevel: 'low' } } })
-  }, 15000);
+  }, 22000);
   return boundedText(data.candidates?.[0]?.content?.parts?.map(x => x.text || '').join(' '), 600);
 }
 export default async function handler(req, res) {
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     if (!answer) throw new Error('Empty model response');
     return res.status(200).json(aliceResponse(body, answer, [...history, { role: 'model', text: answer }]));
   } catch (error) {
-    console.error('Gemini unavailable:', createHash('sha256').update(error.message).digest('hex').slice(0, 10));
+    console.error('Gemini unavailable:', error.message.startsWith('Upstream HTTP ') ? error.message : (error.name === 'TimeoutError' || /timeout/i.test(error.message) ? 'timeout' : 'network/error'));
     return res.status(200).json(aliceResponse(body, 'Сейчас не получается ответить. Попробуй ещё раз чуть позже.', previous));
   }
 }
