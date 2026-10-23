@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const MODEL = 'gemini-2.5-flash-lite';
 const MAX_TURNS = 6;
 const SYSTEM = 'Ты голосовой помощник Алисы. Отвечай на русском, коротко и естественно, обычно 1–3 предложения, до 350 символов. Без Markdown, ссылок и списков. Если использованы результаты поиска, опирайся на них и не выдумывай факты. Если данных недостаточно, честно скажи об этом.';
 const SEARCH_RE = /сегодня|сейчас|последн|новост|актуальн|погод|курс |цена|сколько стоит|в интернете|найди|поищи|поиск|2026|завтра|вчера/i;
@@ -42,8 +42,8 @@ async function askGemini(history, search) {
   const data = await fetchJSON('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(MODEL) + ':generateContent', {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM }] }, contents, generationConfig: { maxOutputTokens: 600, thinkingConfig: { thinkingLevel: 'low' } } })
-  }, 22000);
+    body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM }] }, contents, generationConfig: { maxOutputTokens: 220, temperature: 0.5 } })
+  }, 9000);
   return boundedText(data.candidates?.[0]?.content?.parts?.map(x => x.text || '').join(' '), 600);
 }
 export default async function handler(req, res) {
